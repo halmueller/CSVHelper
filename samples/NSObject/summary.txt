@@ -1,0 +1,10 @@
+Class Australianpostcodes
+    longitude
+    latitude
+    type
+    postoffice
+    state
+    suburb
+    postcode
+------------
+
