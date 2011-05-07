@@ -1,0 +1,39 @@
+This project generates Objective-C code to support the conversion of CSV files into Core Data.
+
+The heart of the project is Matt Gallagher's CSVParser class. This
+class reads a CSV file and calls a designated @selector for each row
+of the CSV, passing the selector an NSDictionary of values from that
+row, keyed by the column headers. I've used this class in several
+projects and it works quite well.
+
+For my current work, I'd like to read about 2 dozen files, each with a
+different layout. Manually creating an Objective-C class for each of
+these files, and writing the associated calls and callbacks, felt like
+too much work. I automated it instead.
+
+The resulting class is CSVDirectoryProcessor. A CSVDirectoryProcessor
+reads every CSV file in a directory. It then does the following:
+--create Foo.h and Foo.m class stubs for each Foo.CSV found
+--generates a partial MyDocument.m (containing all the callbacks)
+which reads each CSV and then invokes CSVParser on that file.
+--generates a summary.txt which lists each class created, and the
+properties in each class. This summary.txt is useful as a reference
+for manually editing your .xcdatamodel file.
+
+Code generation is different depending on whether you select vanilla
+Core Data, Core Data plus MOGenerator, or simply NSObject subclasses.
+
+The supporting project, CSVHelper, is just a GUI wrapped around
+CSVDirectoryProcessor. It lets you navigate to a directory, choose
+what sort of code generation you want, and fire off the code
+generator. All generated source code is placed into the same directory
+as the original CSV files.
+
+Once CSVDirectoryProcessor has run, you still need to edit the
+.xcdatamodel file, create all of your entities, and wire up the
+relationships. The assignment of values into Core Data
+attributes/properties is quite crude, and you'll certainly want to
+edit the generated callbacks. But this project gets a good portion of
+the tedium out of the way.
+
+Hal

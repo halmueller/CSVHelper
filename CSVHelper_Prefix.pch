@@ -1,0 +1,21 @@
+//
+// Prefix header for all source files of the 'CSVHelper' target in the 'CSVHelper' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
+
+#if DEBUG
+#define MGLogName(args...)    NSLog( @"%s %@", __PRETTY_FUNCTION__, [NSString stringWithFormat: args])
+#define MGLog(args...)    NSLog( @"%@", [NSString stringWithFormat: args])
+#define LogMethod() NSLog(@"%@ %@ %s (line %d)", NSStringFromSelector(_cmd), self, __PRETTY_FUNCTION__, __LINE__)
+
+#else  
+// DEBUG not defined:
+
+#define MGLogName(args...) 
+#define MGLog(args...)    // do nothing.
+#define LogMethod() 
+
+#endif
