@@ -23,6 +23,7 @@
 NSString *workingDirectoryKey = @"workingDirectory";
 NSString *useCoreDataKey = @"useCoreData";
 NSString *useMOGeneratorKey = @"useMOGenerator";
+NSString *trimWhitespaceKey = @"trimWhitespace";
 
 - (void)initializeDefaults {
 	NSMutableDictionary *defaultValues = [NSMutableDictionary dictionary];
@@ -60,6 +61,7 @@ NSString *useMOGeneratorKey = @"useMOGenerator";
 	processor.outputDirectory = to;
 	processor.useCoreData = [[NSUserDefaults standardUserDefaults] boolForKey:useCoreDataKey];
 	processor.useMOGenerator = [[NSUserDefaults standardUserDefaults] boolForKey:useMOGeneratorKey];
+	processor.trimWhitespace = [[NSUserDefaults standardUserDefaults] boolForKey:trimWhitespaceKey];
 	[processor engage];
 	[processor release];
 }

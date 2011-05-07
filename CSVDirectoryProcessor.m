@@ -21,6 +21,7 @@
 @synthesize outputDirectory;
 @synthesize useCoreData;
 @synthesize useMOGenerator;
+@synthesize trimWhitespace;
 @synthesize summary;
 @synthesize classNames;
 @synthesize headerFileStrings;
@@ -159,8 +160,14 @@
 	}
 	
 	[headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-		[result appendFormat:@"theInstance.%@ = [theRecord objectForKey:@\"%@\"];\n",
-		 [obj lowercaseString], obj];
+		if (self.trimWhitespace) {
+			[result appendFormat:@"theInstance.%@ = [[theRecord objectForKey:@\"%@\"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];\n",
+			 [obj lowercaseString], obj];
+		}
+		else{
+			[result appendFormat:@"theInstance.%@ = [theRecord objectForKey:@\"%@\"];\n",
+			 [obj lowercaseString], obj];
+		}
 	}];
 
 	if (!self.useCoreData) {
@@ -299,6 +306,7 @@
 
 	for (NSString *classname in self.classNames) {
 		[invocationsText appendString:[self.invocationMethods objectForKey:classname]];
+		[invocationsText appendFormat:@"NSLog(@\"%@ complete\");\n\n", classname];
 		[callbacksText appendString:[self.callbackMethods objectForKey:classname]];
 		
 		NSString *headerPath = [[self.outputDirectory URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.h", classname]] path];

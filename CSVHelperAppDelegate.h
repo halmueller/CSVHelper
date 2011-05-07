@@ -25,6 +25,7 @@
 extern NSString *workingDirectoryKey;
 extern NSString *useCoreDataKey;
 extern NSString *useMOGeneratorKey;
+extern NSString *trimWhitespaceKey;
 
 - (IBAction)go:(id)sender;
 - (IBAction)changeWorkingDirectory:(id)sender;

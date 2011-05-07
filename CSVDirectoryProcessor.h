@@ -20,6 +20,7 @@
 	NSURL *outputDirectory;
 	BOOL useCoreData;
 	BOOL useMOGenerator;
+	BOOL trimWhitespace;
 	NSMutableString *summary;
 	NSMutableArray *classNames;
 	NSMutableDictionary *headerFileStrings;
@@ -32,6 +33,7 @@
 @property (nonatomic, copy) NSURL *outputDirectory;
 @property (nonatomic) BOOL useCoreData;
 @property (nonatomic) BOOL useMOGenerator;
+@property (nonatomic) BOOL trimWhitespace;
 @property (nonatomic, retain) NSMutableString *summary;
 @property (nonatomic, retain) NSMutableArray *classNames;
 @property (nonatomic, retain) NSMutableDictionary *headerFileStrings;
