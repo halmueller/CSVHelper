@@ -74,7 +74,7 @@
 		[self.summary appendFormat:@"    %@\n", [obj lowercaseString]];
 	}];
 	[self.summary appendString:@"------------\n\n"];
-
+	
 	NSMutableString *result = [NSMutableString string];
 	if (useCoreData) {
 		if (useMOGenerator) {
@@ -169,7 +169,7 @@
 			 [obj lowercaseString], obj];
 		}
 	}];
-
+	
 	if (!self.useCoreData) {
 		[result appendFormat:@"\n// before releasing, should do something with theInstance\n[theInstance release];\n"];
 	}
@@ -183,7 +183,7 @@
 {
 	NSMutableString *result = [NSMutableString string];
 	NSString *parserVar = [NSString stringWithFormat:@"%@Parser", classname];
-
+	
 	[result appendFormat:@"NSString *%@ = [NSString stringWithContentsOfURL:[NSURL URLWithString:@\"%@\"]\n\
 	 encoding:NSUTF8StringEncoding\n\
 	 error:nil];\nNSAssert(%@, @\"could not read %@\");\n\n",
@@ -192,10 +192,10 @@
 	 [self contentsStringNameForClassname:classname], [csvfile absoluteString]];
 	
 	[result appendFormat:@"CSVParser *%@ = \n\
-	 	[[CSVParser alloc]\n\
-	 	  initWithString:%@\n\
-		  separator:@\",\"\n\
-		  hasHeader:YES\n\
+	 [[CSVParser alloc]\n\
+	 initWithString:%@\n\
+	 separator:@\",\"\n\
+	 hasHeader:YES\n\
 	 fieldNames:[NSArray arrayWithObjects:", parserVar, [self contentsStringNameForClassname:classname]];
 	
 	[headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {[result appendFormat:@"@\"%@\",", obj];}];
@@ -233,7 +233,7 @@
 	NSString *implementationFileContents = [self boilerplateMForCSVHeaders:headers 
 																 classname:classname];
 	[self.implementationFileStrings setObject:implementationFileContents forKey:classname];
-
+	
 	[parser release];
 	
 	return headers;
@@ -256,7 +256,7 @@
 }
 
 - (void)addParserCallbackForClass:(NSString *)classname
-							headers:(NSDictionary *)headers
+						  headers:(NSDictionary *)headers
 {
 	[self.callbackMethods setObject:[self parserCallbackForHeaders:headers
 														 classname:classname]
@@ -282,20 +282,20 @@
 			NSURL *dataURL = [self.inputDirectory 
 							  URLByAppendingPathComponent:filename];
 			NSDictionary *headers = [self generateClassFilesAndHeadersForCSVFile:dataURL
-																		   classname:classname];
-
+																	   classname:classname];
+			
 			[self addParserInvocationForClass:classname
 									  headers:headers
 									  dataURL:dataURL];
 			[self addParserCallbackForClass:classname
-									  headers:headers];
+									headers:headers];
 		}
 	}
 }
 
 - (void)writeOutputs
 {
-	NSString *summaryPath = [[self.outputDirectory URLByAppendingPathComponent:@"summary.txt"] path];
+	NSString *summaryPath = [[self.outputDirectory URLByAppendingPathComponent:@"CSV classes summary.txt"] path];
 	if (![[NSFileManager defaultManager] createFileAtPath:summaryPath
 												 contents:[self.summary dataUsingEncoding:NSUTF8StringEncoding]
 											   attributes:nil])
@@ -303,29 +303,34 @@
 	
 	NSMutableString *invocationsText = [NSMutableString string];
 	NSMutableString *callbacksText = [NSMutableString string];
-
+	NSMutableString *importsText = [NSMutableString string];
+	
 	for (NSString *classname in self.classNames) {
+		[importsText appendFormat:@"#import \"%@.h\"\n", classname];
 		[invocationsText appendString:[self.invocationMethods objectForKey:classname]];
 		[invocationsText appendFormat:@"NSLog(@\"%@ complete\");\n\n", classname];
 		[callbacksText appendString:[self.callbackMethods objectForKey:classname]];
 		
-		NSString *headerPath = [[self.outputDirectory URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.h", classname]] path];
-		NSString *implementationPath = [[self.outputDirectory URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.m", classname]] path];
-		BOOL headerOK = [[NSFileManager defaultManager] createFileAtPath:headerPath
-																contents:[[self.headerFileStrings objectForKey:classname] dataUsingEncoding:NSUTF8StringEncoding]
-															  attributes:nil];
-		if (!headerOK)
-			NSLog(@"failed to create header file %@", headerPath);
-		
-		BOOL implementationOK = [[NSFileManager defaultManager] createFileAtPath:implementationPath
-																		contents:[[self.implementationFileStrings objectForKey:classname] dataUsingEncoding:NSUTF8StringEncoding]
-																	  attributes:nil];
-		if (!implementationOK)
-			NSLog(@"failed to create implementation file %@", implementationPath);
+		if ((self.useCoreData && !self.useMOGenerator) ||
+			!self.useCoreData) {
+			NSString *headerPath = [[self.outputDirectory URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.h", classname]] path];
+			NSString *implementationPath = [[self.outputDirectory URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.m", classname]] path];
+			BOOL headerOK = [[NSFileManager defaultManager] createFileAtPath:headerPath
+																	contents:[[self.headerFileStrings objectForKey:classname] dataUsingEncoding:NSUTF8StringEncoding]
+																  attributes:nil];
+			if (!headerOK)
+				NSLog(@"failed to create header file %@", headerPath);
+			
+			BOOL implementationOK = [[NSFileManager defaultManager] createFileAtPath:implementationPath
+																			contents:[[self.implementationFileStrings objectForKey:classname] dataUsingEncoding:NSUTF8StringEncoding]
+																		  attributes:nil];
+			if (!implementationOK)
+				NSLog(@"failed to create implementation file %@", implementationPath);
+		}
 	}
-
-	NSString *allCode = [NSString stringWithFormat:@"%@\n\n- (void)performImport:(id)sender\n{\n%@\n}\n",
-						 callbacksText, invocationsText];
+	
+	NSString *allCode = [NSString stringWithFormat:@"%@\n\n%@\n\n- (void)performImport:(id)sender\n{\n%@\n}\n",
+						 importsText, callbacksText, invocationsText];
 	NSString *invocationsPath = [[self.outputDirectory URLByAppendingPathComponent:@"MyDocument-partial.m"] path];
 	if (![[NSFileManager defaultManager] createFileAtPath:invocationsPath
 												 contents:[allCode dataUsingEncoding:NSUTF8StringEncoding]

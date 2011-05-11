@@ -14,12 +14,15 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class CSVDirectoryProcessor;
 @interface CSVHelperAppDelegate : NSObject <NSApplicationDelegate> {
     NSWindow *window;
 	IBOutlet NSTextField *workingDirectoryField;
+	CSVDirectoryProcessor *processor;
 }
 
 @property (assign) IBOutlet NSWindow *window;
+@property (retain, nonatomic) CSVDirectoryProcessor *processor;
 
 #pragma mark defaults
 extern NSString *workingDirectoryKey;

@@ -19,6 +19,7 @@
 @implementation CSVHelperAppDelegate
 
 @synthesize window;
+@synthesize processor;
 
 NSString *workingDirectoryKey = @"workingDirectory";
 NSString *useCoreDataKey = @"useCoreData";
@@ -43,7 +44,8 @@ NSString *trimWhitespaceKey = @"trimWhitespace";
 	panel.canChooseFiles = NO;
 	panel.directoryURL = [NSURL fileURLWithPath:[[NSUserDefaults standardUserDefaults] valueForKey:workingDirectoryKey]
 									isDirectory:YES];
-	[panel beginWithCompletionHandler:^(NSInteger result)
+	[panel beginSheetModalForWindow:self.window
+				  completionHandler:^(NSInteger result) 
 	 {[[NSUserDefaults standardUserDefaults] setValue:[panel.directoryURL path]
 											   forKey:workingDirectoryKey];}];
 }
@@ -56,14 +58,13 @@ NSString *trimWhitespaceKey = @"trimWhitespace";
 							 isDirectory:YES];
 	NSURL *to = [NSURL fileURLWithPath:[[NSUserDefaults standardUserDefaults] valueForKey:workingDirectoryKey]
 						   isDirectory:YES];
-	CSVDirectoryProcessor *processor = [[CSVDirectoryProcessor alloc] init];
-	processor.inputDirectory = from;
-	processor.outputDirectory = to;
-	processor.useCoreData = [[NSUserDefaults standardUserDefaults] boolForKey:useCoreDataKey];
-	processor.useMOGenerator = [[NSUserDefaults standardUserDefaults] boolForKey:useMOGeneratorKey];
-	processor.trimWhitespace = [[NSUserDefaults standardUserDefaults] boolForKey:trimWhitespaceKey];
-	[processor engage];
-	[processor release];
+	self.processor = [[CSVDirectoryProcessor alloc] init];
+	self.processor.inputDirectory = from;
+	self.processor.outputDirectory = to;
+	self.processor.useCoreData = [[NSUserDefaults standardUserDefaults] boolForKey:useCoreDataKey];
+	self.processor.useMOGenerator = [[NSUserDefaults standardUserDefaults] boolForKey:useMOGeneratorKey];
+	self.processor.trimWhitespace = [[NSUserDefaults standardUserDefaults] boolForKey:trimWhitespaceKey];
+	[self.processor engage];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
